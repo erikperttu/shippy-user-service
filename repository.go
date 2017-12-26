@@ -24,7 +24,7 @@ func (repo *UserRepository) GetAll() ([]*pb.User, error) {
 	return users, nil
 }
 
-func (repo *UserRepository) GeId(id string) (*pb.User, error) {
+func (repo *UserRepository) Get(id string) (*pb.User, error) {
 	var user *pb.User
 	user.Id = id
 	if err := repo.db.First(&user).Error; err != nil {
@@ -33,7 +33,7 @@ func (repo *UserRepository) GeId(id string) (*pb.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepository) GeByEmail(email string) (*pb.User, error) {
+func (repo *UserRepository) GetByEmail(email string) (*pb.User, error) {
 	user := &pb.User{}
 	if err := repo.db.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err
