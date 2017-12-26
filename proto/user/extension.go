@@ -1,6 +1,6 @@
 package go_micro_srv_user
 
-import(
+import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 )
