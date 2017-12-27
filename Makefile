@@ -1,7 +1,7 @@
 build:
 	protoc -I. --go_out=plugins=micro:. \
 		proto/user/user.proto
-	docker build -t user-service .
+	docker build -t shippy-user-service .
 
 run:
 	docker run -d --net="host" \
@@ -11,4 +11,4 @@ run:
 		-e DB_USER=postgres \
 		-e MICRO_SERVER_ADDRESS=:50051 \
 		-e MICRO_REGISTRY=mdns \
-		user-service
+		shippy-user-service
