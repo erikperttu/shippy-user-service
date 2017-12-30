@@ -6,6 +6,8 @@ import (
 
 	pb "github.com/erikperttu/shippy-user-service/proto/user"
 	"github.com/micro/go-micro"
+	_ "github.com/micro/go-plugins/broker/nats"
+	_ "github.com/micro/go-plugins/registry/mdns"
 )
 
 func main() {
@@ -32,10 +34,14 @@ func main() {
 		micro.Version("latest"),
 	)
 
+	// Init will parse the cmd line flags
 	srv.Init()
 
+	// Get instance of the broker using our defaults
+	pubSub := srv.Server().Options().Broker
+
 	// Register
-	pb.RegisterUserServiceHandler(srv.Server(), &service{repo, tokenService})
+	pb.RegisterUserServiceHandler(srv.Server(), &service{repo, tokenService, pubSub})
 
 	// Run the server
 	if err := srv.Run(); err != nil {
