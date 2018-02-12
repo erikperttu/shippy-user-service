@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	pb "github.com/erikperttu/shippy-user-service/proto/user"
+	pb "github.com/erikperttu/shippy-user-service/proto/auth"
 )
 
 var (
@@ -23,12 +23,13 @@ type CustomClaims struct {
 	jwt.StandardClaims
 }
 
-// Laravel?
+// Authable nameing from Laravel?
 type Authable interface {
 	Decode(token string) (*CustomClaims, error)
 	Encode(user *pb.User) (string, error)
 }
 
+// TokenService struct with the repository
 type TokenService struct {
 	repo Repository
 }
@@ -56,7 +57,7 @@ func (srv *TokenService) Encode(user *pb.User) (string, error) {
 		user,
 		jwt.StandardClaims{
 			ExpiresAt: expireToken,
-			Issuer:    "go.micro.srv.user",
+			Issuer:    "shippy.user",
 		},
 	}
 
