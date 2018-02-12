@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"context"
-	"encoding/json"
-	pb "github.com/erikperttu/shippy-user-service/proto/user"
-	"github.com/micro/go-micro/broker"
+
+	pb "github.com/erikperttu/shippy-user-service/proto/auth"
+	micro "github.com/micro/go-micro"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,7 +17,7 @@ const topic = "user.created"
 type service struct {
 	repo         Repository
 	tokenService Authable
-	PubSub       broker.Broker
+	Publisher    micro.Publisher
 }
 
 // From users.pb.go
@@ -44,7 +45,7 @@ func (srv *service) GetAll(ctx context.Context, req *pb.Request, res *pb.Respons
 // From users.pb.go
 // Auth(context.Context, *User, *Token) error
 func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error {
-	log.Println("Attemtping to login in with:", req.Email, req.Password)
+	log.Println("Attempting to login in with:", req.Email, req.Password)
 	user, err := srv.repo.GetByEmail(req.Email)
 	if err != nil {
 		return err
@@ -53,7 +54,6 @@ func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error
 
 	// Compare our given password against the hashed password
 	// stored in the database
-
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return err
 	}
@@ -69,41 +69,22 @@ func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error
 // From users.pb.go
 // Create(context.Context, *User, *Response) error
 func (srv *service) Create(ctx context.Context, req *pb.User, res *pb.Response) error {
+
+	log.Println("Creating user: ", req)
+
 	// Generate the hashed version of our password
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return errors.New(fmt.Sprintf("error hasing password: %v", err))
 	}
 	req.Password = string(hashedPass)
-	//if err := srv.repo.Create(req); err != nil {
-	//	return err
-	//}
-	if err := srv.publishEvent(req); err != nil {
-		return err
+	if err := srv.repo.Create(req); err != nil {
+		return errors.New(fmt.Sprintf("error creating user: %v", err))
+	}
+	if err := srv.Publisher.Publish(ctx, req); err != nil {
+		return errors.New(fmt.Sprintf("error publishing event: %v", err))
 	}
 	res.User = req
-	return nil
-}
-
-func (srv *service) publishEvent(user *pb.User) error {
-	// Marshal to JSON
-	body, err := json.Marshal(user)
-	if err != nil {
-		return err
-	}
-
-	// Create broker message
-	msg := &broker.Message{
-		Header: map[string]string{
-			"id": user.Id,
-		},
-		Body: body,
-	}
-
-	// Publish the message to the broker
-	if err := srv.PubSub.Publish(topic, msg); err != nil {
-		log.Printf("[pub] failed: %v", err)
-	}
 	return nil
 }
 
