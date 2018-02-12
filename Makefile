@@ -4,10 +4,11 @@ build:
 image:
 	docker build -t shippy-user-service .
 run:
-	docker run -d --net="host" \
+	docker run --net="host" \
 		-p 50051 \
-		-e DB_HOST=localhost \
-		-e DB_PASS=password \
+		-e DB_HOST=192.168.99.100 \
+		-e DB_PASSWORD=password \
+		-e DB_NAME=postgres \
 		-e DB_USER=postgres \
 		-e MICRO_SERVER_ADDRESS=:50051 \
 		-e MICRO_REGISTRY=mdns \
