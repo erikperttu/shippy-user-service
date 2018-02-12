@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"os"
 )
 
+//CreateConnection creates the databas connections using github.com/jinzhu/gorm
 func CreateConnection() (*gorm.DB, error) {
 	// Get the env variables
 	DBUser := os.Getenv("DB_USER")
