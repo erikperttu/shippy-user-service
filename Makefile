@@ -1,6 +1,6 @@
 build:
 	protoc -I. --go_out=plugins=micro:. \
-		proto/user/user.proto
+		proto/user/auth.proto
 image:
 	docker build -t shippy-user-service .
 run:
