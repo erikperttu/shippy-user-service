@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	pb "github.com/erikperttu/shippy-user-service/proto/user"
-	"github.com/micro/go-micro"
-	_ "github.com/micro/go-plugins/broker/nats"
+	pb "github.com/erikperttu/shippy-user-service/proto/auth"
+	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/mdns"
 )
 
@@ -30,18 +29,18 @@ func main() {
 	// Create a new micro service
 	srv := micro.NewService(
 		// Must match the protobuf definition
-		micro.Name("go.micro.srv.user"),
+		micro.Name("shippy.auth"),
 		micro.Version("latest"),
 	)
 
 	// Init will parse the cmd line flags
 	srv.Init()
 
-	// Get instance of the broker using our defaults
-	pubSub := srv.Server().Options().Broker
+	// Get instance of the broker using our defaults, commented out for local
+	//publisher := srv.Server().Options().Broker
 
 	// Register
-	pb.RegisterUserServiceHandler(srv.Server(), &service{repo, tokenService, pubSub})
+	pb.RegisterAuthHandler(srv.Server(), &service{repo, tokenService})
 
 	// Run the server
 	if err := srv.Run(); err != nil {
