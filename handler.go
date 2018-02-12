@@ -8,7 +8,6 @@ import (
 	"context"
 
 	pb "github.com/erikperttu/shippy-user-service/proto/auth"
-	micro "github.com/micro/go-micro"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,7 +16,6 @@ const topic = "user.created"
 type service struct {
 	repo         Repository
 	tokenService Authable
-	Publisher    micro.Publisher
 }
 
 // From users.pb.go
@@ -75,14 +73,14 @@ func (srv *service) Create(ctx context.Context, req *pb.User, res *pb.Response) 
 	// Generate the hashed version of our password
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.New(fmt.Sprintf("error hasing password: %v", err))
+		return fmt.Errorf("error hasing password: %v", err)
 	}
 	req.Password = string(hashedPass)
 	if err := srv.repo.Create(req); err != nil {
-		return errors.New(fmt.Sprintf("error creating user: %v", err))
+		return fmt.Errorf("error creating user: %v", err)
 	}
 	if err := srv.Publisher.Publish(ctx, req); err != nil {
-		return errors.New(fmt.Sprintf("error publishing event: %v", err))
+		return fmt.Errorf("error publishing event: %v", err)
 	}
 	res.User = req
 	return nil
