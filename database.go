@@ -16,7 +16,7 @@ func CreateConnection() (*gorm.DB, error) {
 	DBHost := os.Getenv("DB_HOST")
 	DBName := os.Getenv("DB_NAME")
 
-	// TODO: handle err
+	// TODO: handle err?
 	return gorm.Open(
 		"postgres",
 		fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", DBUser, DBPassword, DBHost, DBName),
