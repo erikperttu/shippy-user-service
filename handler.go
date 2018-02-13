@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"context"
@@ -67,24 +68,25 @@ func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error
 // Create(context.Context, *User, *Response) error
 func (srv *service) Create(ctx context.Context, req *pb.User, res *pb.Response) error {
 
-	log.Println("Creating user: ", req)
+	log.Printf("req: %v\n", req)
+	log.Printf("Creating user: %v\n", req)
 
 	// Generate the hashed version of our password
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatalf("error hasing password %v", err)
-		//return fmt.Errorf("error hasing password: %v", err)
+		log.Printf("Hashed Error %v: ", err)
+		return fmt.Errorf("error hasing password: %v", err)
 	}
 	req.Password = string(hashedPass)
 	if err := srv.repo.Create(req); err != nil {
-		log.Fatalf("error creating user %v", err)
-		//return fmt.Errorf("error creating user: %v", err)
+		log.Printf("Create Error %v: ", err)
+		return fmt.Errorf("error creating user: %v", err)
 	}
 
 	token, err := srv.tokenService.Encode(req)
 	if err != nil {
-		log.Fatalf("error encoding req %v", err)
-		//return err
+		log.Printf("Encoding Error %v: ", err)
+		return err
 	}
 	res.User = req
 	res.Token = &pb.Token{Token: token}
