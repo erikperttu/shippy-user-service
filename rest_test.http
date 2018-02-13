@@ -1,0 +1,28 @@
+POST http://192.168.99.100:8080/rpc HTTP/1.1
+content-type: application/json
+
+{
+	"service": "shippy.auth",
+	"method": "Auth.Create",
+	"request": {
+		"user": {
+			"email": "test@example.com",
+			"password": "testing123",
+			"name": "Test Name",
+			"company": "Company one"
+		}
+	}
+}
+
+###
+
+POST http://192.168.99.100:8080/rpc HTTP/1.1
+content-type: application/json
+{
+	"service": "shippy.auth",
+	"method": "Auth.Auth",
+	"request": {
+		"email": "test@example.com",
+		"password": "testing123",
+	}
+}
